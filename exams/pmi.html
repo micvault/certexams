@@ -352,10 +352,11 @@
   </div>
 
   <script src="./pmi-questions.js"></script>
+  <script src="./pmi-interactive.js"></script>
   <script>
     const STORAGE_KEY = "pmi-single-reviewer-v1";
     const questions = Array.isArray(window.PMI_QUESTIONS) ? window.PMI_QUESTIONS : [];
-    let state = { current: 0, answers: {}, viewedStudy: {} };
+    let state = { current: 0, answers: {}, viewedStudy: {}, interactiveResults: {}, interactiveAnswers: {} };
 
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
@@ -363,7 +364,9 @@
         state = {
           current: Number.isInteger(saved.current) ? saved.current : 0,
           answers: saved.answers || {},
-          viewedStudy: saved.viewedStudy || {}
+          viewedStudy: saved.viewedStudy || {},
+          interactiveResults: saved.interactiveResults || {},
+          interactiveAnswers: saved.interactiveAnswers || {}
         };
       }
     } catch {}
@@ -383,8 +386,9 @@
       const answeredMcq = Object.values(state.answers).length;
       const viewedStudy = Object.values(state.viewedStudy).filter(Boolean).length;
       const answered = answeredMcq + viewedStudy;
-      const correct = Object.values(state.answers).filter(x => x.correct).length;
-      const wrong = Object.values(state.answers).filter(x => !x.correct).length;
+      const interactive = Object.values(state.interactiveResults || {});
+      const correct = Object.values(state.answers).filter(x => x.correct).length + interactive.filter(x => x && x.correct).length;
+      const wrong = Object.values(state.answers).filter(x => !x.correct).length + interactive.filter(x => x && !x.correct).length;
       pillProgress.textContent = `${answered} / ${total} answered`;
       pillCorrect.textContent = `Correct: ${correct}`;
       pillWrong.textContent = `Needs Review: ${wrong}`;
@@ -398,7 +402,13 @@
         b.textContent = q.number;
         if (index === state.current) b.classList.add("current");
         if (q.type === "mcq" && state.answers[q.number]) b.classList.add(state.answers[q.number].correct ? "done" : "wrong");
-        if (q.type !== "mcq" && state.viewedStudy[q.number]) b.classList.add("study");
+        if (q.type !== "mcq" && state.viewedStudy[q.number]) {
+          if (PMI_INTERACTIVE.isInteractive(q) && state.interactiveResults[q.number]) {
+            b.classList.add(state.interactiveResults[q.number].correct ? "done" : "wrong");
+          } else {
+            b.classList.add("study");
+          }
+        }
         b.onclick = () => { state.current = index; save(); render(); };
         navGrid.appendChild(b);
       });
@@ -441,6 +451,20 @@
     }
 
     function renderStudy(q) {
+      if (PMI_INTERACTIVE.isInteractive(q)) {
+        const completed = !!state.viewedStudy[q.number] && !!state.interactiveResults[q.number];
+        PMI_INTERACTIVE.render(q, contentArea, completed, (isCorrect, response) => {
+          state.viewedStudy[q.number] = true;
+          state.interactiveResults[q.number] = { correct: !!isCorrect };
+          if (response) state.interactiveAnswers[q.number] = response;
+          save();
+          updateStats();
+          renderNav();
+        }, state.interactiveAnswers[q.number]);
+        submitBtn.style.display = "none";
+        revealBtn.style.display = "none";
+        return;
+      }
       const box = document.createElement("div");
       box.className = "study";
       box.textContent = q.question;
@@ -476,7 +500,7 @@
 
       const q = questions[state.current];
       qNumber.textContent = `Question ${q.number}`;
-      qType.textContent = q.type === "mcq" ? "Multiple Choice" : "Study Item";
+      qType.textContent = q.type === "mcq" ? "Multiple Choice" : q.type === "order" ? "Ordering" : q.type === "match" ? "Matching" : q.type === "classify" ? "Classification" : "Study Item";
       qText.textContent = q.question;
 
       contentArea.innerHTML = "";
@@ -536,7 +560,7 @@
       const confirmed = confirm("Are you sure you want to reset all progress? This will clear all your answers and cannot be undone.");
       if (confirmed) {
         localStorage.removeItem(STORAGE_KEY);
-        state = { current: 0, answers: {}, viewedStudy: {} };
+        state = { current: 0, answers: {}, viewedStudy: {}, interactiveResults: {}, interactiveAnswers: {} };
         render();
         alert("Progress has been reset!");
       }
