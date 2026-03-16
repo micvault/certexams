@@ -1,0 +1,139 @@
+/* Shared clean + mobile layout overrides for all exam/reviewer pages */
+body {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+.topbar {
+  background: #f8fafc !important;
+  border-bottom: 1px solid #d1d5db !important;
+  padding: 10px 16px !important;
+  box-shadow: none !important;
+}
+
+.back {
+  border-radius: 4px !important;
+  border: 1px solid #93c5fd !important;
+  padding: 8px 12px !important;
+}
+
+.title { color: #111827 !important; }
+.sub { color: #6b7280 !important; }
+
+.card {
+  border-radius: 0 !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: none !important;
+}
+
+.qcard { border-radius: 0 !important; }
+
+.qtype,
+.badge,
+.nav,
+.search,
+.opt,
+.study,
+button,
+.reset-btn,
+.shuffle-btn,
+.pill,
+.result,
+.exam-mode-notice,
+.score-card,
+.review-item {
+  border-radius: 4px !important;
+}
+
+.opt {
+  border-width: 1px !important;
+}
+
+.actions {
+  gap: 8px !important;
+}
+
+button {
+  padding: 9px 12px !important;
+}
+
+.app {
+  gap: 12px !important;
+  padding: 12px !important;
+}
+
+.side {
+  top: 72px !important;
+}
+
+@media (max-width: 700px) {
+  .topbar {
+    position: static !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+
+  .back {
+    padding: 6px 10px !important;
+    font-size: .82rem !important;
+  }
+
+  .title { font-size: .92rem !important; }
+  .sub { font-size: .76rem !important; }
+
+  .stats {
+    margin-left: 0 !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+  }
+
+  .pill {
+    padding: 5px 8px !important;
+    font-size: .78rem !important;
+  }
+
+  .app {
+    padding: 8px !important;
+    gap: 8px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .qmeta,
+  #contentArea,
+  .actions {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .qtext {
+    font-size: .94rem !important;
+    line-height: 1.5 !important;
+    padding: 12px !important;
+  }
+
+  .side { position: static !important; padding: 10px !important; }
+  .grid { max-height: 42vh !important; }
+
+  button {
+    font-size: .86rem !important;
+    padding: 8px 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sub { display: none !important; }
+
+  .actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .actions .b-finish {
+    grid-column: 1 / -1 !important;
+  }
+
+  .nav {
+    font-size: .8rem !important;
+    padding: 8px 0 !important;
+  }
+}
