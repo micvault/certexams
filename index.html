@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PMI Certification Reviewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: min(680px, 100%);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .sub {
+      color: rgba(255,255,255,0.95);
+      line-height: 1.7;
+      margin-bottom: 32px;
+      font-size: 1.05rem;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: left;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 80px rgba(0,0,0,0.35);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      color: #1a202c;
+      letter-spacing: -0.5px;
+    }
+
+    .desc {
+      color: #4a5568;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+
+    .meta {
+      color: #667eea;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta::before {
+      content: "📚";
+      font-size: 1.2rem;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 14px rgba(102,126,234,0.4);
+    }
+
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(102,126,234,0.5);
+    }
+
+    .foot {
+      margin-top: 24px;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 24px;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>PMI Certification Exam Reviewer</h1>
+    <p class="sub">Single reviewer only, with flashcards using a local question bank derived from your PMI reference set.</p>
+
+    <section class="card">
+      <span class="badge">Only Certification</span>
+      <div class="title">PMI Certification Reviewer</div>
+      <p class="desc">Practice using flashcards with immediate answer feedback and explanations.</p>
+      <div class="meta">87 questions</div>
+      <a class="cta" href="exams/pmi.html">Start Reviewing →</a>
+    </section>
+
+    <p class="foot">Goodluck!</p>
+  </main>
+</body>
+</html>
