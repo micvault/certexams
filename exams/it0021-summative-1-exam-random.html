@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT0021 - Summative 1 (Random Exam Mode)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #1a202c;
+      min-height: 100vh;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 2px solid #e2e8f0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .back {
+      text-decoration: none;
+      color: #667eea;
+      padding: 10px 18px;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      background: #ffffff;
+      font-size: .9rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+    .back:hover {
+      background: #667eea;
+      color: #ffffff;
+      transform: translateX(-2px);
+    }
+    .title { font-size: 1.1rem; font-weight: 900; color: #1a202c; }
+    .sub { font-size: .85rem; color: #4a5568; }
+    .stats { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill {
+      padding: 8px 14px;
+      border-radius: 100px;
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      font-size: .85rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .side { position: static !important; }
+    }
+
+    .card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .qcard { padding: 32px; }
+    .qmeta { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .badge {
+      padding: 9px 16px;
+      border-radius: 100px;
+      font-size: .85rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .qtype {
+      padding: 9px 16px;
+      border-radius: 100px;
+      font-size: .85rem;
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      color: #4a5568;
+      font-weight: 700;
+    }
+    .qtext {
+      font-size: clamp(1rem,2vw,1.15rem);
+      line-height: 1.8;
+      margin-bottom: 24px;
+      color: #2d3748;
+      font-weight: 500;
+    }
+
+    .options { display: grid; gap: 12px; }
+    .opt {
+      border: 2px solid #e2e8f0;
+      background: #f7fafc;
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .opt:hover {
+      border-color: #667eea;
+      background: #edf2f7;
+      transform: translateX(4px);
+    }
+    .opt input { margin-top: 4px; transform: scale(1.2); cursor: pointer; }
+    .opt.selected {
+      border-color: #10b981;
+      background: #d1fae5;
+    }
+    .opt.correct {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+    .opt.wrong {
+      border-color: #f56565;
+      background: #fff5f5;
+    }
+    .opt.disabled { pointer-events: none; cursor: default; }
+    .opt-letter {
+      font-weight: 900;
+      min-width: 24px;
+      color: #667eea;
+      font-size: 1.05rem;
+    }
+
+    .study {
+      border: 2px dashed #cbd5e0;
+      border-radius: 16px;
+      padding: 20px;
+      background: #f7fafc;
+      line-height: 1.8;
+      color: #2d3748;
+    }
+    .study-answer {
+      margin-top: 16px;
+      padding: 18px;
+      border-radius: 16px;
+      border: 2px solid #10b981;
+      background: #edf2f7;
+      white-space: pre-wrap;
+      display: none;
+      color: #2d3748;
+      font-weight: 500;
+    }
+    .study-answer.show { display: block; }
+
+    .actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 22px;
+      font-size: .95rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    .b-secondary {
+      background: #ffffff;
+      color: #4a5568;
+      border: 2px solid #cbd5e0;
+    }
+    .b-secondary:hover:not(:disabled) {
+      border-color: #667eea;
+      color: #667eea;
+    }
+    .b-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16,185,129,0.4);
+    }
+    .b-finish {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(59,130,246,0.4);
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 16px;
+      border: 2px solid #cbd5e0;
+      background: #f7fafc;
+      line-height: 1.7;
+      display: none;
+      color: #2d3748;
+    }
+    .result.show { display: block; }
+
+    .side { padding: 20px; position: sticky; top: 100px; }
+    .search {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      color: #2d3748;
+      margin-bottom: 16px;
+      font-size: .95rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .search:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      max-height: 68vh;
+      overflow: auto;
+    }
+    .nav {
+      padding: 11px 0;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      color: #4a5568;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: .85rem;
+      transition: all 0.2s ease;
+    }
+    .nav:hover {
+      border-color: #667eea;
+      transform: scale(1.05);
+    }
+    .nav.current {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #10b981;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    }
+    .nav.answered {
+      background: #d1fae5;
+      border-color: #10b981;
+      color: #065f46;
+    }
+    .nav.done {
+      background: #f0fff4;
+      border-color: #48bb78;
+      color: #22543d;
+    }
+    .nav.wrong {
+      background: #fff5f5;
+      border-color: #f56565;
+      color: #742a2a;
+    }
+    .nav.study {
+      background: #fffaf0;
+      border-color: #ed8936;
+      color: #7c2d12;
+    }
+
+    .status {
+      margin-top: 12px;
+      color: #718096;
+      font-size: .9rem;
+    }
+
+    .reset-btn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 2px solid #f56565;
+      background: #ffffff;
+      color: #c53030;
+      font-size: .9rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    .reset-btn:hover {
+      background: #fff5f5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245,101,101,0.3);
+    }
+
+    .results-page {
+      display: none;
+      padding: 32px;
+    }
+    .results-page.show { display: block; }
+    .score-card {
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 20px;
+      color: #ffffff;
+      margin-bottom: 32px;
+    }
+    .score-card.fail {
+      background: linear-gradient(135deg, #f56565 0%, #ef4444 100%);
+    }
+    .score-big {
+      font-size: 4rem;
+      font-weight: 900;
+      margin: 16px 0;
+    }
+    .score-label {
+      font-size: 1.2rem;
+      opacity: 0.95;
+    }
+
+    .review-section {
+      margin-top: 24px;
+    }
+    .review-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: #1a202c;
+    }
+    .review-item {
+      padding: 16px;
+      border-radius: 14px;
+      border: 2px solid #e2e8f0;
+      background: #f7fafc;
+      margin-bottom: 12px;
+    }
+    .review-item.correct {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+    .review-item.wrong {
+      border-color: #f56565;
+      background: #fff5f5;
+    }
+    .review-q {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #2d3748;
+    }
+    .review-ans {
+      font-size: 0.9rem;
+      color: #4a5568;
+      line-height: 1.6;
+    }
+    .review-exp {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #cbd5e0;
+      font-size: 0.88rem;
+      color: #718096;
+      font-style: italic;
+    }
+
+    .exam-mode-notice {
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: #dbeafe;
+      border: 2px solid #3b82f6;
+      color: #1e40af;
+      font-size: .9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
+  <link rel="stylesheet" href="./pmi-clean.css" />
+</head>
+<body>
+  <div class="topbar">
+    <a href="../index.html" class="back">← Home</a>
+    <div>
+      <div class="title">IT0021 - Summative 1 (Random Exam Mode)</div>
+      <div class="sub">Questions are shuffled. Answer all items, then see your score and results.</div>
+    </div>
+    <div class="stats">
+      <div class="pill" id="pillProgress">0 / 0 answered</div>
+    </div>
+  </div>
+
+  <div class="app">
+    <main class="card qcard">
+      <div id="questionView">
+        <div class="exam-mode-notice">
+          📝 Exam Mode: No feedback until you finish all questions
+        </div>
+        <div class="qmeta">
+          <span class="badge" id="qNumber">Question -</span>
+          <span class="qtype" id="qType">Loading...</span>
+        </div>
+        <p class="qtext" id="qText">Loading questions...</p>
+        <div id="contentArea"></div>
+        <div class="actions">
+          <button class="b-secondary" id="prevBtn">← Previous</button>
+          <button class="b-primary" id="nextBtn">Next →</button>
+          <button class="b-finish" id="submitBtn">Submit Exam 🎯</button>
+        </div>
+        <div class="status" id="loadStatus">Loaded local question bank.</div>
+      </div>
+
+      <div id="resultsView" class="results-page">
+        <div class="score-card" id="scoreCard">
+          <div class="score-label">Your Score</div>
+          <div class="score-big" id="scoreBig">--</div>
+          <div class="score-label" id="scoreText">-- out of --</div>
+        </div>
+
+        <div class="review-section">
+          <div class="review-title">✅ Correct Answers (<span id="correctCount">0</span>)</div>
+          <div id="correctList"></div>
+        </div>
+
+        <div class="review-section">
+          <div class="review-title">❌ Incorrect Answers (<span id="wrongCount">0</span>)</div>
+          <div id="wrongList"></div>
+        </div>
+
+        <div class="actions">
+          <button class="b-secondary" id="retakeBtn">Retake Exam</button>
+          <button class="b-primary" onclick="window.location.href='../index.html'">Back to Home</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="card side">
+      <input class="search" id="jumpInput" placeholder="Jump to position #" inputmode="numeric" />
+      <div class="grid" id="navGrid"></div>
+      <button class="reset-btn" id="resetBtn">🔄 Reset Exam</button>
+    </aside>
+  </div>
+
+  <script src="./it0021-summative-1-questions.js"></script>
+  <script src="./pmi-interactive.js"></script>
+  <script>
+    const STORAGE_KEY = "it0021-summative-1-random-exam-v1";
+    const LAST_SCORE_KEY = "it0021-summative-1-random-last-score-v1";
+    const sourceQuestions = Array.isArray(window.IT0021_SUMMATIVE_1_QUESTIONS) ? window.IT0021_SUMMATIVE_1_QUESTIONS : [];
+    let questions = [];
+    let state = { current: 0, answers: {}, viewedStudy: {}, interactiveAnswers: {}, questionOrder: [], finished: false };
+
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      if (saved && typeof saved === "object" && Array.isArray(saved.questionOrder) && saved.questionOrder.length === sourceQuestions.length) {
+        state = {
+          current: Number.isInteger(saved.current) ? saved.current : 0,
+          answers: saved.answers || {},
+          viewedStudy: saved.viewedStudy || {},
+          interactiveAnswers: saved.interactiveAnswers || {},
+          questionOrder: saved.questionOrder,
+          finished: saved.finished || false
+        };
+        questions = state.questionOrder.map(idx => sourceQuestions[idx]);
+      } else {
+        questions = shuffleArray(sourceQuestions);
+        state.questionOrder = questions.map(q => sourceQuestions.indexOf(q));
+      }
+    } catch {
+      questions = shuffleArray(sourceQuestions);
+      state.questionOrder = questions.map(q => sourceQuestions.indexOf(q));
+    }
+
+    const $ = id => document.getElementById(id);
+    const qNumber = $("qNumber"), qType = $("qType"), qText = $("qText"), contentArea = $("contentArea"),
+          prevBtn = $("prevBtn"), nextBtn = $("nextBtn"), submitBtn = $("submitBtn"),
+          navGrid = $("navGrid"), jumpInput = $("jumpInput"), loadStatus = $("loadStatus"),
+          pillProgress = $("pillProgress"), resetBtn = $("resetBtn"),
+          questionView = $("questionView"), resultsView = $("resultsView"),
+          scoreCard = $("scoreCard"), scoreBig = $("scoreBig"), scoreText = $("scoreText"),
+          correctCount = $("correctCount"), wrongCount = $("wrongCount"),
+          correctList = $("correctList"), wrongList = $("wrongList"),
+          retakeBtn = $("retakeBtn");
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function isInteractiveType(q) {
+      return q.type === "match" || q.type === "order" || q.type === "classify";
+    }
+
+    function evaluateQuestion(q) {
+      if (q.type === "mcq") {
+        const ans = state.answers[q.number];
+        return {
+          answered: !!ans,
+          correct: !!ans && !!ans.correct,
+          selected: ans?.selected || null
+        };
+      }
+
+      if (q.type === "match") {
+        const saved = state.interactiveAnswers[q.number] || {};
+        const allFilled = q.pairs.every((_, i) => !!saved[i]);
+        const correct = allFilled && q.pairs.every((p, i) => saved[i] === p.left);
+        return {
+          answered: Object.keys(saved).length > 0,
+          correct,
+          response: saved
+        };
+      }
+
+      if (q.type === "order") {
+        const savedOrder = state.interactiveAnswers[q.number]?.order || [];
+        const correct = savedOrder.length === q.items.length && savedOrder.every((item, i) => item === q.items[i]);
+        return {
+          answered: savedOrder.length > 0,
+          correct,
+          response: savedOrder
+        };
+      }
+
+      if (q.type === "classify") {
+        const savedBuckets = state.interactiveAnswers[q.number]?.buckets || {};
+        const placedCount = Object.values(savedBuckets).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0);
+        const allPlacedCorrectly = q.items.every(it => Array.isArray(savedBuckets[it.category]) && savedBuckets[it.category].includes(it.text));
+        const noExtras = q.categories.every(cat => (savedBuckets[cat] || []).every(text => q.items.some(it => it.text === text && it.category === cat)));
+        const correct = placedCount === q.items.length && allPlacedCorrectly && noExtras;
+        return {
+          answered: placedCount > 0,
+          correct,
+          response: savedBuckets
+        };
+      }
+
+      return { answered: !!state.viewedStudy[q.number], correct: false };
+    }
+
+    function getScorableQuestions() {
+      return questions.filter(q => q.type === "mcq" || isInteractiveType(q));
+    }
+
+    function getEvaluatedScorableQuestions() {
+      return getScorableQuestions().map(q => ({ q, result: evaluateQuestion(q) }));
+    }
+
+    function getExamScoreSnapshot() {
+      const evaluated = getEvaluatedScorableQuestions();
+      const correctCountValue = evaluated.filter(x => x.result.correct).length;
+      const totalCountValue = evaluated.length;
+      const percentValue = totalCountValue > 0 ? Math.round((correctCountValue / totalCountValue) * 100) : 0;
+      return {
+        correct: correctCountValue,
+        total: totalCountValue,
+        percent: percentValue
+      };
+    }
+
+    function renderBottomStatus() {
+      const baseText = `Loaded ${questions.length} items in randomized exam mode.`;
+      try {
+        const previous = JSON.parse(localStorage.getItem(LAST_SCORE_KEY) || "null");
+        if (previous && Number.isFinite(previous.percent) && Number.isFinite(previous.correct) && Number.isFinite(previous.total)) {
+          loadStatus.textContent = `${baseText} Previous score: ${previous.percent}% (${previous.correct}/${previous.total}).`;
+          return;
+        }
+      } catch {}
+      loadStatus.textContent = baseText;
+    }
+
+    function updateStats() {
+      const total = questions.length;
+      const answeredMcq = Object.keys(state.answers).length;
+      const viewedStudy = Object.values(state.viewedStudy).filter(Boolean).length;
+      const answered = answeredMcq + viewedStudy;
+      pillProgress.textContent = `${answered} / ${total} answered`;
+    }
+
+    function renderNav() {
+      navGrid.innerHTML = "";
+      questions.forEach((q, index) => {
+        const b = document.createElement("button");
+        b.className = "nav";
+        b.textContent = index + 1;
+        if (index === state.current && !state.finished) b.classList.add("current");
+
+        if (state.finished) {
+          if (q.type === "mcq" && state.answers[q.number]) {
+            b.classList.add(state.answers[q.number].correct ? "done" : "wrong");
+          }
+          if (isInteractiveType(q)) {
+            const interactiveResult = evaluateQuestion(q);
+            b.classList.add(interactiveResult.correct ? "done" : "wrong");
+          } else if (q.type !== "mcq" && state.viewedStudy[q.number]) {
+            b.classList.add("study");
+          }
+        } else {
+          if (q.type === "mcq" && state.answers[q.number]) b.classList.add("answered");
+          if (q.type !== "mcq" && state.viewedStudy[q.number]) b.classList.add("answered");
+        }
+
+        b.onclick = () => {
+          if (!state.finished) {
+            state.current = index;
+            save();
+            render();
+          }
+        };
+        navGrid.appendChild(b);
+      });
+    }
+
+    function renderMCQ(q) {
+      const wrap = document.createElement("div");
+      wrap.className = "options";
+      const existing = state.answers[q.number];
+      Object.entries(q.options).forEach(([key, value]) => {
+        const label = document.createElement("label");
+        label.className = "opt";
+        const isSelected = existing && existing.selected === key;
+        if (isSelected) label.classList.add("selected");
+        if (existing) label.classList.add("disabled");
+        label.innerHTML = `<input type="radio" name="opt" value="${key}" ${isSelected ? "checked" : ""} ${existing ? "disabled" : ""} /><span class="opt-letter">${key}.</span><span>${value}</span>`;
+        if (!existing) {
+          label.onclick = () => {
+            wrap.querySelectorAll(".opt").forEach(o => o.classList.remove("selected"));
+            label.classList.add("selected");
+          };
+        }
+        wrap.appendChild(label);
+      });
+      contentArea.appendChild(wrap);
+    }
+
+    function renderStudy(q) {
+      if (PMI_INTERACTIVE.isInteractive(q)) {
+        PMI_INTERACTIVE.render(q, contentArea, false, () => {});
+
+        const checkBtn = contentArea.querySelector(".ia-check-btn");
+        if (checkBtn) checkBtn.remove();
+
+        const helper = document.createElement("div");
+        helper.className = "status";
+        helper.style.marginTop = "10px";
+        helper.textContent = "Exam mode: no instant checking. Your response is submitted when you click Next or Submit Exam.";
+        contentArea.appendChild(helper);
+
+        restoreInteractiveAnswer(q);
+        return;
+      }
+      const box = document.createElement("div");
+      box.className = "study";
+      box.innerHTML = `<strong>Study Item</strong><br/>${q.question}<br/><br/><em>Click Next to mark as viewed</em>`;
+      contentArea.appendChild(box);
+    }
+
+    function render() {
+      if (state.finished) {
+        showResults();
+        return;
+      }
+
+      if (!questions.length) return;
+      if (state.current < 0) state.current = 0;
+      if (state.current > questions.length - 1) state.current = questions.length - 1;
+
+      const q = questions[state.current];
+      qNumber.textContent = `Question ${state.current + 1} of ${questions.length}`;
+      qType.textContent = q.type === "mcq" ? "Multiple Choice" : q.type === "order" ? "Ordering" : q.type === "match" ? "Matching" : q.type === "classify" ? "Classification" : "Study Item";
+      qText.textContent = q.question;
+
+      contentArea.innerHTML = "";
+
+      if (q.type === "mcq") renderMCQ(q);
+      else renderStudy(q);
+
+      prevBtn.disabled = state.current === 0;
+      nextBtn.disabled = state.current === questions.length - 1;
+
+      updateStats();
+      renderNav();
+      save();
+    }
+
+    function submitCurrentQuestion() {
+      const q = questions[state.current];
+      if (!q) return;
+
+      if (q.type === "mcq") {
+        if (state.answers[q.number]) return;
+        const selected = contentArea.querySelector('input[name="opt"]:checked');
+        if (selected) {
+          state.answers[q.number] = {
+            selected: selected.value,
+            correct: selected.value === q.answer
+          };
+          save();
+        }
+        return;
+      }
+
+      captureInteractiveAnswer(q);
+      if (!state.viewedStudy[q.number]) {
+        state.viewedStudy[q.number] = true;
+        save();
+      }
+    }
+
+    function captureInteractiveAnswer(q) {
+      if (q.type === "match") {
+        const slots = contentArea.querySelectorAll(".match-slot[data-idx]");
+        if (!slots.length) return;
+
+        const answer = {};
+        slots.forEach(slot => {
+          const idx = slot.dataset.idx;
+          const text = (slot.textContent || "").trim();
+          if (text && text !== "— place here —" && !text.includes("place here")) {
+            answer[idx] = text;
+          }
+        });
+
+        state.interactiveAnswers[q.number] = answer;
+        save();
+        return;
+      }
+
+      if (q.type === "order") {
+        const orderedItems = [...contentArea.querySelectorAll('.order-item span[style*="flex:1"]')]
+          .map(el => (el.textContent || "").trim())
+          .filter(Boolean);
+        state.interactiveAnswers[q.number] = { order: orderedItems };
+        save();
+        return;
+      }
+
+      if (q.type === "classify") {
+        const buckets = {};
+        contentArea.querySelectorAll(".classify-bucket").forEach(bucket => {
+          const title = (bucket.querySelector(".classify-bucket-title")?.textContent || "").trim();
+          if (!title) return;
+          buckets[title] = [...bucket.querySelectorAll(".classify-placed-item")]
+            .map(el => (el.textContent || "").replace("✕", "").trim())
+            .filter(Boolean);
+        });
+        state.interactiveAnswers[q.number] = { buckets };
+        save();
+      }
+    }
+
+    function restoreInteractiveAnswer(q) {
+      if (q.type !== "match") return;
+      const savedAnswer = state.interactiveAnswers[q.number];
+      if (!savedAnswer || typeof savedAnswer !== "object") return;
+
+      Object.entries(savedAnswer).forEach(([idx, value]) => {
+        const safeValue = String(value).replace(/"/g, "\\\"");
+        const chip = contentArea.querySelector(`.match-chip[data-val="${safeValue}"]`);
+        const row = contentArea.querySelector(`.match-row .match-slot[data-idx="${idx}"]`)?.closest(".match-row");
+        if (chip && row) {
+          chip.click();
+          row.click();
+        }
+      });
+    }
+
+    function showResults() {
+      questionView.style.display = "none";
+      resultsView.classList.add("show");
+
+      const evaluated = getEvaluatedScorableQuestions();
+      const correct = evaluated.filter(x => x.result.correct);
+      const wrong = evaluated.filter(x => !x.result.correct);
+      const scoreSnapshot = getExamScoreSnapshot();
+      const total = scoreSnapshot.total;
+      const score = scoreSnapshot.correct;
+      const percentage = scoreSnapshot.percent;
+
+      scoreBig.textContent = `${percentage}%`;
+      scoreText.textContent = `${score} out of ${total} correct`;
+      correctCount.textContent = correct.length;
+      wrongCount.textContent = wrong.length;
+
+      if (percentage >= 70) {
+        scoreCard.classList.remove("fail");
+      } else {
+        scoreCard.classList.add("fail");
+      }
+
+      correctList.innerHTML = "";
+      correct.forEach(({ q, result }) => {
+        const item = document.createElement("div");
+        item.className = "review-item correct";
+        if (q.type === "mcq") {
+          item.innerHTML = `
+            <div class="review-q">Q${q.number}: ${q.question}</div>
+            <div class="review-ans">✅ Your answer: <strong>${result.selected}. ${q.options[result.selected]}</strong></div>
+            ${q.explanation ? `<div class="review-exp">${q.explanation}</div>` : ''}
+          `;
+        } else {
+          item.innerHTML = `
+            <div class="review-q">Q${q.number}: ${q.question}</div>
+            <div class="review-ans">✅ Your interactive response is correct.</div>
+            ${q.explanation ? `<div class="review-exp">${q.explanation}</div>` : ''}
+          `;
+        }
+        correctList.appendChild(item);
+      });
+
+      wrongList.innerHTML = "";
+      wrong.forEach(({ q, result }) => {
+        const item = document.createElement("div");
+        item.className = "review-item wrong";
+        if (q.type === "mcq") {
+          const hasAnswer = !!result.selected;
+          item.innerHTML = `
+            <div class="review-q">Q${q.number}: ${q.question}</div>
+            <div class="review-ans">
+              ${hasAnswer
+                ? `❌ Your answer: <strong>${result.selected}. ${q.options[result.selected]}</strong><br/>`
+                : `❌ Your answer: <strong>(unanswered)</strong><br/>`}
+              ✅ Correct answer: <strong>${q.answer}. ${q.options[q.answer]}</strong>
+            </div>
+            ${q.explanation ? `<div class="review-exp">${q.explanation}</div>` : ''}
+          `;
+        } else {
+          item.innerHTML = `
+            <div class="review-q">Q${q.number}: ${q.question}</div>
+            <div class="review-ans">❌ Your interactive response is incomplete or incorrect.</div>
+            ${q.explanation ? `<div class="review-exp">${q.explanation}</div>` : ''}
+          `;
+        }
+        wrongList.appendChild(item);
+      });
+
+      renderNav();
+    }
+
+    prevBtn.onclick = () => {
+      if (state.current > 0) {
+        state.current -= 1;
+        render();
+      }
+    };
+
+    submitBtn.onclick = () => {
+      submitCurrentQuestion();
+      const answered = Object.keys(state.answers).length + Object.values(state.viewedStudy).filter(Boolean).length;
+      const total = questions.length;
+      const unanswered = total - answered;
+      const msg = unanswered > 0
+        ? `You have ${unanswered} unanswered question(s). Submit anyway and see your score?`
+        : "Submit the exam and see your results?";
+      if (confirm(msg)) {
+        state.finished = true;
+        save();
+        showResults();
+      }
+    };
+
+    nextBtn.onclick = () => {
+      submitCurrentQuestion();
+      if (state.current < questions.length - 1) {
+        state.current += 1;
+        render();
+      }
+    };
+
+    jumpInput.onkeydown = (e) => {
+      if (e.key !== "Enter") return;
+      const num = parseInt(jumpInput.value, 10);
+      if (!Number.isNaN(num) && num >= 1 && num <= questions.length) {
+        state.current = num - 1;
+        render();
+      }
+      jumpInput.value = "";
+    };
+
+    resetBtn.onclick = () => {
+      const confirmed = confirm("Reset the exam? This will clear all your answers and start fresh.");
+      if (confirmed) {
+        localStorage.removeItem(STORAGE_KEY);
+        questions = shuffleArray(sourceQuestions);
+        state = {
+          current: 0,
+          answers: {},
+          viewedStudy: {},
+          interactiveAnswers: {},
+          questionOrder: questions.map(q => sourceQuestions.indexOf(q)),
+          finished: false
+        };
+        location.reload();
+      }
+    };
+
+    retakeBtn.onclick = () => {
+      const previousScore = getExamScoreSnapshot();
+      localStorage.setItem(LAST_SCORE_KEY, JSON.stringify(previousScore));
+      localStorage.removeItem(STORAGE_KEY);
+      questions = shuffleArray(sourceQuestions);
+      state = {
+        current: 0,
+        answers: {},
+        viewedStudy: {},
+        interactiveAnswers: {},
+        questionOrder: questions.map(q => sourceQuestions.indexOf(q)),
+        finished: false
+      };
+      resultsView.classList.remove("show");
+      questionView.style.display = "block";
+      renderBottomStatus();
+      render();
+    };
+
+    document.addEventListener("keydown", (e) => {
+      if (state.finished) return;
+      if (e.key === "ArrowRight" && state.current < questions.length - 1) {
+        nextBtn.click();
+      }
+      if (e.key === "ArrowLeft" && state.current > 0) {
+        state.current--;
+        render();
+      }
+    });
+
+    if (questions.length > 0) {
+      renderBottomStatus();
+      if (state.finished) {
+        showResults();
+      } else {
+        render();
+      }
+    } else {
+      loadStatus.textContent = "Failed to load local question bank.";
+      qType.textContent = "Load Error";
+      qText.textContent = "Could not load local question data. Ensure exams/it0021-summative-1-questions.js is available.";
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+    }
+  </script>
+</body>
+</html>

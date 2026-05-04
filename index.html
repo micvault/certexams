@@ -21,6 +21,11 @@
       width: min(780px, 100%);
     }
 
+    .panels {
+      display: grid;
+      gap: 16px;
+    }
+
     .panel {
       background: #ffffff;
       border: 1px solid #dbe4f0;
@@ -118,62 +123,95 @@
 </head>
 <body>
   <main class="wrap">
-    <section class="panel">
-      <h1>PMI Certification Reviewer</h1>
-      <p class="sub">Choose a mode and start. All items come from your local 86-question bank.</p>
+    <div class="panels">
+      <section class="panel">
+        <h1>Summative Reviewers</h1>
+        <p class="sub">Non-certification exams for class summatives.</p>
 
-      <div class="modes">
-        <article class="mode">
-          <div class="mode-main">
-            <div class="mode-title">Sequential Review</div>
-            <div class="mode-desc">Original order with immediate feedback.</div>
-          </div>
-          <a class="btn" href="exams/pmi.html">Open</a>
-        </article>
+        <div class="modes">
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">IT0021 - Summative 1</div>
+              <div class="mode-desc">System Administration and Maintenance exam mode.</div>
+            </div>
+            <a class="btn" href="exams/it0021-summative-1.html">Open</a>
+          </article>
 
-        <article class="mode">
-          <div class="mode-main">
-            <div class="mode-title">Exam Mode</div>
-            <div class="mode-desc">No feedback until final submit.</div>
-          </div>
-          <a class="btn" href="exams/pmi-exam.html">Open</a>
-        </article>
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">IT0021 - Summative 1 (Random Exam Mode)</div>
+              <div class="mode-desc">Shuffled exam order, no immediate feedback.</div>
+            </div>
+            <a class="btn" href="exams/it0021-summative-1-exam-random.html">Open</a>
+          </article>
 
-        <article class="mode">
-          <div class="mode-main">
-            <div class="mode-title">Random Exam Mode</div>
-            <div class="mode-desc">Shuffled exam order, no immediate feedback.</div>
-          </div>
-          <a class="btn" href="exams/pmi-exam-random.html">Open</a>
-        </article>
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">IT0021 - Summative 1 (Quick Review Random)</div>
+              <div class="mode-desc">Quick auto-advance with shuffled order.</div>
+            </div>
+            <a class="btn" href="exams/it0021-summative-1-quick-random.html">Open</a>
+          </article>
+        </div>
+      </section>
 
-        <article class="mode">
-          <div class="mode-main">
-            <div class="mode-title">Quick Review</div>
-            <div class="mode-desc">Fast flow with auto-advance.</div>
-          </div>
-          <a class="btn" href="exams/pmi-quick.html">Open</a>
-        </article>
+      <section class="panel">
+        <h1>PMI Certification Reviewer</h1>
+        <p class="sub">Choose a mode and start. All items come from your local 86-question bank.</p>
 
-        <article class="mode">
-          <div class="mode-main">
-            <div class="mode-title">Quick Review (Random)</div>
-            <div class="mode-desc">Quick auto-advance with shuffled order.</div>
-          </div>
-          <a class="btn" href="exams/pmi-quick-random.html">Open</a>
-        </article>
+        <div class="modes">
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">Sequential Review</div>
+              <div class="mode-desc">Original order with immediate feedback.</div>
+            </div>
+            <a class="btn" href="exams/pmi.html">Open</a>
+          </article>
 
-        <article class="mode">
-          <div class="mode-main">
-            <div class="mode-title">Random Review</div>
-            <div class="mode-desc">Shuffled practice with saved progress.</div>
-          </div>
-          <a class="btn" href="exams/pmi-random.html">Open</a>
-        </article>
-      </div>
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">Exam Mode</div>
+              <div class="mode-desc">No feedback until final submit.</div>
+            </div>
+            <a class="btn" href="exams/pmi-exam.html">Open</a>
+          </article>
 
-      <p class="foot">Good luck.</p>
-    </section>
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">Random Exam Mode</div>
+              <div class="mode-desc">Shuffled exam order, no immediate feedback.</div>
+            </div>
+            <a class="btn" href="exams/pmi-exam-random.html">Open</a>
+          </article>
+
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">Quick Review</div>
+              <div class="mode-desc">Fast flow with auto-advance.</div>
+            </div>
+            <a class="btn" href="exams/pmi-quick.html">Open</a>
+          </article>
+
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">Quick Review (Random)</div>
+              <div class="mode-desc">Quick auto-advance with shuffled order.</div>
+            </div>
+            <a class="btn" href="exams/pmi-quick-random.html">Open</a>
+          </article>
+
+          <article class="mode">
+            <div class="mode-main">
+              <div class="mode-title">Random Review</div>
+              <div class="mode-desc">Shuffled practice with saved progress.</div>
+            </div>
+            <a class="btn" href="exams/pmi-random.html">Open</a>
+          </article>
+        </div>
+
+        <p class="foot">Good luck.</p>
+      </section>
+    </div>
   </main>
 </body>
 </html>
