@@ -499,30 +499,77 @@
       });
     }
 
+    function getAnswerKeys(answer) {
+      return String(answer || "")
+        .split(",")
+        .map(part => part.trim())
+        .filter(Boolean);
+    }
+
+    function isMultiAnswer(q) {
+      return getAnswerKeys(q.answer).length > 1;
+    }
+
+    function formatAnswerText(q) {
+      return getAnswerKeys(q.answer)
+        .map(key => `${key}. ${q.options[key] || ""}`)
+        .join(", ");
+    }
+
+    function getSelectedAnswerKeys(container) {
+      return [...container.querySelectorAll('input[name="opt"]:checked')]
+        .map(input => input.value)
+        .sort();
+    }
+
+    function answersMatch(selected, q) {
+      const correct = getAnswerKeys(q.answer).sort();
+      return selected.length === correct.length && selected.every((key, index) => key === correct[index]);
+    }
+
     function renderMCQ(q) {
       const wrap = document.createElement("div");
       wrap.className = "options";
+      const multi = isMultiAnswer(q);
+      const correctKeys = getAnswerKeys(q.answer);
+      const existing = state.answers[q.number];
+      const existingSelected = Array.isArray(existing?.selected)
+        ? [...existing.selected].sort()
+        : getAnswerKeys(existing?.selected);
       Object.entries(q.options).forEach(([key, value]) => {
         const label = document.createElement("label");
         label.className = "opt";
-        label.innerHTML = `<input type="radio" name="opt" value="${key}" /><span class="opt-letter">${key}.</span><span>${value}</span>`;
+        const isSelected = existingSelected.includes(key);
+        label.innerHTML = `<input type="${multi ? "checkbox" : "radio"}" name="opt" value="${key}" ${isSelected ? "checked" : ""} ${existing ? "disabled" : ""} /><span class="opt-letter">${key}.</span><span>${value}</span>`;
+        if (isSelected) label.classList.add("selected");
+        if (existing) label.classList.add("disabled");
+        if (!existing) {
+          const input = label.querySelector("input");
+          input.addEventListener("change", () => {
+            if (multi) {
+              label.classList.toggle("selected", input.checked);
+            } else {
+              wrap.querySelectorAll(".opt").forEach(o => o.classList.remove("selected"));
+              label.classList.add("selected");
+            }
+          });
+        }
         wrap.appendChild(label);
       });
       contentArea.appendChild(wrap);
 
-      const existing = state.answers[q.number];
       if (existing) {
         wrap.querySelectorAll(".opt").forEach(opt => {
           const input = opt.querySelector("input");
           opt.classList.add("disabled");
           input.disabled = true;
-          if (input.value === existing.selected) input.checked = true;
-          if (input.value === q.answer) opt.classList.add("correct");
-          if (input.value === existing.selected && !existing.correct) opt.classList.add("wrong");
+          if (input.checked) opt.classList.add("selected");
+          if (correctKeys.includes(input.value)) opt.classList.add("correct");
+          if (existingSelected.includes(input.value) && !correctKeys.includes(input.value)) opt.classList.add("wrong");
         });
 
         resultBox.className = `result show ${existing.correct ? "correct" : "wrong"}`;
-        resultBox.innerHTML = `<strong>${existing.correct ? "✓ Correct!" : "✗ Incorrect"}</strong><br/>Correct answer: <strong>${q.answer}. ${q.options[q.answer]}</strong><div style="margin-top:10px;color:#4a5568">${q.explanation || ""}</div>`;
+        resultBox.innerHTML = `<strong>${existing.correct ? "✓ Correct!" : "✗ Incorrect"}</strong><br/>Correct answer: <strong>${formatAnswerText(q)}</strong><div style="margin-top:10px;color:#4a5568">${q.explanation || ""}</div>`;
         submitBtn.style.display = "inline-flex";
         submitBtn.disabled = true;
         submitBtn.textContent = "Already Answered";
@@ -610,13 +657,14 @@
 
     submitBtn.onclick = () => {
       const q = questions[state.current];
-      const selected = contentArea.querySelector('input[name="opt"]:checked');
-      if (!selected) {
+      const selected = getSelectedAnswerKeys(contentArea);
+      if (!selected.length) {
         resultBox.className = "result show wrong";
         resultBox.innerHTML = "<strong>Please select an answer first.</strong>";
         return;
       }
-      state.answers[q.number] = { selected: selected.value, correct: selected.value === q.answer };
+      const multi = isMultiAnswer(q);
+      state.answers[q.number] = { selected: multi ? selected : selected[0], correct: answersMatch(selected, q) };
       save();
 
       const wrap = contentArea.querySelector(".options");
@@ -624,13 +672,13 @@
         const input = opt.querySelector("input");
         opt.classList.add("disabled");
         input.disabled = true;
-        if (input.value === q.answer) opt.classList.add("correct");
-        if (input.value === selected.value && selected.value !== q.answer) opt.classList.add("wrong");
+        if (getAnswerKeys(q.answer).includes(input.value)) opt.classList.add("correct");
+        if (selected.includes(input.value) && !getAnswerKeys(q.answer).includes(input.value)) opt.classList.add("wrong");
       });
 
-      const isCorrect = selected.value === q.answer;
+      const isCorrect = answersMatch(selected, q);
       resultBox.className = `result show ${isCorrect ? "correct" : "wrong"}`;
-      resultBox.innerHTML = `<strong>${isCorrect ? "✓ Correct!" : "✗ Incorrect"}</strong><br/>Correct answer: <strong>${q.answer}. ${q.options[q.answer]}</strong><div style="margin-top:10px;color:#4a5568">${q.explanation || ""}</div>`;
+      resultBox.innerHTML = `<strong>${isCorrect ? "✓ Correct!" : "✗ Incorrect"}</strong><br/>Correct answer: <strong>${formatAnswerText(q)}</strong><div style="margin-top:10px;color:#4a5568">${q.explanation || ""}</div>`;
       submitBtn.disabled = true;
       submitBtn.textContent = "Already Answered";
       updateStats();

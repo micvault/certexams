@@ -629,26 +629,81 @@
       });
     }
 
+    function getAnswerKeys(answer) {
+      return String(answer || "")
+        .split(",")
+        .map(part => part.trim())
+        .filter(Boolean);
+    }
+
+    function isMultiAnswer(q) {
+      return getAnswerKeys(q.answer).length > 1;
+    }
+
+    function formatAnswerText(q) {
+      return getAnswerKeys(q.answer)
+        .map(key => `${key}. ${q.options[key] || ""}`)
+        .join(", ");
+    }
+
+    function getSelectedAnswerKeys(container) {
+      return [...container.querySelectorAll('input[name="opt"]:checked')]
+        .map(input => input.value)
+        .sort();
+    }
+
+    function answersMatch(selected, q) {
+      const correct = getAnswerKeys(q.answer).sort();
+      return selected.length === correct.length && selected.every((key, index) => key === correct[index]);
+    }
+
+    function formatSelectedAnswers(selected, q) {
+      return selected.length
+        ? selected.map(key => `${key}. ${q.options[key] || ""}`).join(", ")
+        : "(unanswered)";
+    }
+
     function renderMCQ(q) {
       const wrap = document.createElement("div");
       wrap.className = "options";
       const existing = state.answers[q.number];
+      const multi = isMultiAnswer(q);
+      const correctKeys = getAnswerKeys(q.answer);
+      const existingSelected = Array.isArray(existing?.selected)
+        ? [...existing.selected].sort()
+        : getAnswerKeys(existing?.selected);
       Object.entries(q.options).forEach(([key, value]) => {
         const label = document.createElement("label");
         label.className = "opt";
-        const isSelected = existing && existing.selected === key;
+        const isSelected = existingSelected.includes(key);
         if (isSelected) label.classList.add("selected");
         if (existing) label.classList.add("disabled");
-        label.innerHTML = `<input type="radio" name="opt" value="${key}" ${isSelected ? "checked" : ""} ${existing ? "disabled" : ""} /><span class="opt-letter">${key}.</span><span>${value}</span>`;
+        label.innerHTML = `<input type="${multi ? "checkbox" : "radio"}" name="opt" value="${key}" ${isSelected ? "checked" : ""} ${existing ? "disabled" : ""} /><span class="opt-letter">${key}.</span><span>${value}</span>`;
         if (!existing) {
-          label.onclick = () => {
-            wrap.querySelectorAll(".opt").forEach(o => o.classList.remove("selected"));
-            label.classList.add("selected");
-          };
+          const input = label.querySelector("input");
+          input.addEventListener("change", () => {
+            if (multi) {
+              label.classList.toggle("selected", input.checked);
+            } else {
+              wrap.querySelectorAll(".opt").forEach(o => o.classList.remove("selected"));
+              label.classList.add("selected");
+            }
+          });
         }
         wrap.appendChild(label);
       });
       contentArea.appendChild(wrap);
+
+      if (existing) {
+        wrap.querySelectorAll(".opt").forEach(opt => {
+          const input = opt.querySelector("input");
+          opt.classList.add("disabled");
+          input.disabled = true;
+          if (input.checked) opt.classList.add("selected");
+          if (correctKeys.includes(input.value)) opt.classList.add("correct");
+          if (existingSelected.includes(input.value) && !correctKeys.includes(input.value)) opt.classList.add("wrong");
+        });
+      }
     }
 
     function renderStudy(q) {
@@ -707,11 +762,12 @@
 
       if (q.type === "mcq") {
         if (state.answers[q.number]) return;
-        const selected = contentArea.querySelector('input[name="opt"]:checked');
-        if (selected) {
+        const selected = getSelectedAnswerKeys(contentArea);
+        if (selected.length) {
+          const multi = isMultiAnswer(q);
           state.answers[q.number] = {
-            selected: selected.value,
-            correct: selected.value === q.answer
+            selected: multi ? selected : selected[0],
+            correct: answersMatch(selected, q)
           };
           save();
         }
@@ -811,9 +867,10 @@
         const item = document.createElement("div");
         item.className = "review-item correct";
         if (q.type === "mcq") {
+          const selected = Array.isArray(result.selected) ? result.selected : getAnswerKeys(result.selected);
           item.innerHTML = `
             <div class="review-q">Q${q.number}: ${q.question}</div>
-            <div class="review-ans">✅ Your answer: <strong>${result.selected}. ${q.options[result.selected]}</strong></div>
+            <div class="review-ans">✅ Your answer: <strong>${formatSelectedAnswers(selected, q)}</strong></div>
             ${q.explanation ? `<div class="review-exp">${q.explanation}</div>` : ''}
           `;
         } else {
@@ -832,13 +889,14 @@
         item.className = "review-item wrong";
         if (q.type === "mcq") {
           const hasAnswer = !!result.selected;
+          const selected = Array.isArray(result.selected) ? result.selected : getAnswerKeys(result.selected);
           item.innerHTML = `
             <div class="review-q">Q${q.number}: ${q.question}</div>
             <div class="review-ans">
               ${hasAnswer
-                ? `❌ Your answer: <strong>${result.selected}. ${q.options[result.selected]}</strong><br/>`
+                ? `❌ Your answer: <strong>${formatSelectedAnswers(selected, q)}</strong><br/>`
                 : `❌ Your answer: <strong>(unanswered)</strong><br/>`}
-              ✅ Correct answer: <strong>${q.answer}. ${q.options[q.answer]}</strong>
+              ✅ Correct answer: <strong>${formatAnswerText(q)}</strong>
             </div>
             ${q.explanation ? `<div class="review-exp">${q.explanation}</div>` : ''}
           `;
